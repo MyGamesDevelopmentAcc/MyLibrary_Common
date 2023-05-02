@@ -1,4 +1,5 @@
-## Interface: 100005
-## Title: LIB: My Common
+## Interface: 100100
+## Title: Lib: |CFFFF2459My|rLibrary Common
 ## Dependencies: 
+## Version: 10.1.0-1.0
 common.xml
