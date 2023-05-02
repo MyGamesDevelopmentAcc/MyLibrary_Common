@@ -1,0 +1,4 @@
+## Interface: 100005
+## Title: LIB: My Common
+## Dependencies: 
+common.xml
