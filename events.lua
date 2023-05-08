@@ -1,7 +1,7 @@
 --[[
 Use:
     LibStub("MyLibrary_Events"):RegisterEvent("PLAYER_LOGIN",someFunction);
-or     
+or
     obj= {};
     LibStub("MyLibrary_Events").embed(obj);
     obj:RegisterEvent("PLAYER_LOGIN",someFunction);
@@ -32,7 +32,10 @@ end
 
 local function OnEvent(self, event, ...)
     local functions = getEvents(event);
+    
+    --print ("MyLibrary_Events", "OnEvent",event)
     for i, _ in pairs(functions) do
+        --print ("MyLibrary_Events", "OnEvent calling function", i)
         i(event, ...);
     end
 end
@@ -40,13 +43,15 @@ end
 local frame = CreateFrame("Frame")
 frame:HookScript("OnEvent", OnEvent);
 function MyLibrary_Events:RegisterEvent(eventName, f)
-    if (not events[eventName]) then
+    --print ("MyLibrary_Events", "Registering",eventName,f)
+    if (not frame:IsEventRegistered(eventName)) then
         frame:RegisterEvent(eventName)
     end
     addEvent(eventName, f)
 end
 
 function MyLibrary_Events:UnregisterEvent(eventName, f)
+    --print ("MyLibrary_Events", "Unregistering",eventName,f)
     removeEvent(eventName, f)
     if (events[eventName] and next(events[eventName]) == nil) then
         frame:UnregisterEvent(eventName)
@@ -68,18 +73,23 @@ end
 function MyLibrary_Events.embed(nameSpace)
     local nameSpaceFunctions = {};
     function nameSpace:RegisterEvent(eventName, f)
+        --print("registering event", eventName, f);
         if (f == nil) then
             f = function(...)
                 nameSpace[eventName](nameSpace, ...);
             end
+
+            print("creating function", f);
             nameSpaceFunctions[eventName] = f;
         end
         MyLibrary_Events:RegisterEvent(eventName, f)
     end
 
     function nameSpace:UnregisterEvent(eventName, f)
+        --print("unregistering event", eventName, f);
         if (f == nil) then
             f = nameSpaceFunctions[eventName]
+            print("getting function for event", eventName, f);
         end
         MyLibrary_Events:UnregisterEvent(eventName, f)
     end
