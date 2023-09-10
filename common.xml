@@ -2,5 +2,4 @@
 	<Script file="libs/LibStub/LibStub.lua"/>
 	<Script file="events.lua"/>
 	<Script file="db.lua"/>
-	<Script file="minimap.lua"/>
 </Ui>
