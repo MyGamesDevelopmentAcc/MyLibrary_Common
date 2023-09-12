@@ -14,7 +14,7 @@ if not MyLibrary_Events then return end
 local events = {};
 local function addEvent(eventName, f)
     events[eventName] = events[eventName] or {};
-    events[eventName][f] = true;
+    table.insert(events[eventName],f);
 end
 
 local function removeEvent(eventName, f)
@@ -22,18 +22,22 @@ local function removeEvent(eventName, f)
         return;
     else
         events[eventName] = events[eventName] or {};
-        events[eventName][f] = nil;
+        for i,n in ipairs(events[eventName]) do
+            if (f==n) then
+                table.remove(events[eventName], i);
+                return
+            end
+        end        
     end
 end
 
-local function getEvents(eventName)
+local function getFunctions(eventName)
     return events[eventName] or {};
 end
 
 local function OnEvent(self, event, ...)
-    local functions = getEvents(event);
-    for i, _ in pairs(functions) do
-        i(event, ...);
+    for _, f in ipairs(getFunctions(event)) do
+        f(event, ...);
     end
 end
 
