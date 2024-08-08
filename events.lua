@@ -14,7 +14,7 @@ if not MyLibrary_Events then return end
 local events = {};
 local function addEvent(eventName, f)
     events[eventName] = events[eventName] or {};
-    table.insert(events[eventName],f);
+    table.insert(events[eventName], f);
 end
 
 local function removeEvent(eventName, f)
@@ -22,12 +22,12 @@ local function removeEvent(eventName, f)
         return;
     else
         events[eventName] = events[eventName] or {};
-        for i,n in ipairs(events[eventName]) do
-            if (f==n) then
+        for i, n in ipairs(events[eventName]) do
+            if (f == n) then
                 table.remove(events[eventName], i);
                 return
             end
-        end        
+        end
     end
 end
 
@@ -50,13 +50,33 @@ function MyLibrary_Events:RegisterEvent(eventName, f)
     addEvent(eventName, f)
 end
 
-function MyLibrary_Events:UnregisterEvent(eventName, f)
-    removeEvent(eventName, f)
-    if (events[eventName] and next(events[eventName]) == nil) then
-        frame:UnregisterEvent(eventName)
+function MyLibrary_Events:RegisterCustomEvent(eventName, f)
+    if (C_EventUtils.IsEventValid(eventName)) then
+        error("Event " ..
+            eventName .. " is a valid WoW event, do not use this function for valid events.")
     end
+    addEvent(eventName, f)
 end
 
+function MyLibrary_Events:UnregisterEvent(eventName, f)
+    removeEvent(eventName, f)
+end
+
+function MyLibrary_Events:TriggerCustomEvent(eventName, ...)
+    if (C_EventUtils.IsEventValid(eventName)) then
+        error("Event " ..
+            eventName .. " is a valid WoW event, do not use this function for valid events.")
+    end
+    OnEvent(nil, eventName, ...);
+end
+
+function MyLibrary_Events:UnregisterCustomEvent(eventName, f)
+    if (C_EventUtils.IsEventValid(eventName)) then
+        error("Event " ..
+            eventName .. " is a valid WoW event, do not use this function for valid events.")
+    end
+    removeEvent(eventName, f)
+end
 
 function MyLibrary_Events:OnDbLoaded(f)
     self:RegisterEvent("PLAYER_LOGIN", f)
@@ -85,8 +105,29 @@ function MyLibrary_Events.embed(nameSpace)
         MyLibrary_Events:UnregisterEvent(eventName, f)
     end
 
+    function nameSpace:RegisterCustomEvent(eventName, f)
+        if (f == nil) then
+            f = function(...)
+                nameSpace[eventName](nameSpace, ...);
+            end
+            nameSpaceFunctions[eventName] = f;
+        end
+        MyLibrary_Events:RegisterCustomEvent(eventName, f)
+    end
+
+    function nameSpace:UnregisterCustomEvent(eventName, f)
+        if (f == nil) then
+            f = nameSpaceFunctions[eventName]
+        end
+        MyLibrary_Events:UnregisterCustomEvent(eventName, f)
+    end
+
     function nameSpace:OnDbLoaded(f)
         MyLibrary_Events:OnDbLoaded(f)
+    end
+
+    function nameSpace:TriggerCustomEvent(eventName, ...)
+        MyLibrary_Events:TriggerCustomEvent(eventName, ...)
     end
 
     function nameSpace:OnInitialize(f)
